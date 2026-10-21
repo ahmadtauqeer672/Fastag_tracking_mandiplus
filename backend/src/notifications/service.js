@@ -21,7 +21,7 @@ function prepareMessage(eventType, vehicleNo, data) {
 // 5.0 full flow: prepare -> send via WhatsApp -> log -> retry/fallback to email on failure
 export async function createNotificationForEvent(userId, vehicleNo, eventType, data) {
   const message = prepareMessage(eventType, vehicleNo, data);
-  const user = db.prepare(`SELECT * FROM users WHERE id = ?`).get(userId);
+  const user = await db.prepare(`SELECT * FROM users WHERE id = ?`).get(userId);
   if (!user) return null;
 
   // 5.2 Send via Meta WhatsApp API
@@ -30,7 +30,7 @@ export async function createNotificationForEvent(userId, vehicleNo, eventType, d
   let channel = 'whatsapp';
 
   const notifId = crypto.randomUUID();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO notifications (id, user_id, vehicle_no, channel, message, event_type, status)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(notifId, userId, vehicleNo, channel, message, eventType, status);
@@ -39,19 +39,19 @@ export async function createNotificationForEvent(userId, vehicleNo, eventType, d
   if (!waResult.delivered) {
     const emailResult = await sendEmail({ to: user.email, subject: `LorryCare Alert: ${vehicleNo}`, message });
     const fallbackId = crypto.randomUUID();
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO notifications (id, user_id, vehicle_no, channel, message, event_type, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(fallbackId, userId, vehicleNo, 'email', message, eventType, emailResult.status === 'sent' ? 'retried' : 'failed');
 
-    auditLog(userId, 'notification_fallback', { vehicleNo, eventType, primaryChannel: 'whatsapp', fallback: 'email' });
+    await auditLog(userId, 'notification_fallback', { vehicleNo, eventType, primaryChannel: 'whatsapp', fallback: 'email' });
   }
 
   return { notifId, message, status, channel };
 }
 
-export function getNotificationsForUser(userId) {
-  return db.prepare(
+export async function getNotificationsForUser(userId) {
+  return await db.prepare(
     `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 100`
   ).all(userId);
 }

@@ -22,7 +22,7 @@ export async function fetchAndEnrichLiveLocations(userId, vehicleNoRaw) {
   // Record every search (even ones Traqo has no data for) so the user can
   // re-run it from their history.
   if (userId) {
-    db.prepare(
+    await db.prepare(
       `INSERT INTO search_history (id, user_id, query, query_type) VALUES (?, ?, ?, 'fastag')`
     ).run(crypto.randomUUID(), userId, vehicleNo);
   }
@@ -46,7 +46,7 @@ export async function fetchAndEnrichLiveLocations(userId, vehicleNoRaw) {
     const geo = await reverseGeocode(lat, lon);
 
     const id = crypto.randomUUID();
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO fastag_pings
         (id, vehicle_no, latitude, longitude, toll_plaza_address, position_time,
          city, state, pincode, geocode_display_name, geocode_source, fetched_by)
@@ -70,14 +70,14 @@ export async function fetchAndEnrichLiveLocations(userId, vehicleNoRaw) {
     });
   }
 
-  auditLog(userId, 'fastag_live_location_fetch', { vehicleNo, pingCount: enriched.length });
+  await auditLog(userId, 'fastag_live_location_fetch', { vehicleNo, pingCount: enriched.length });
 
   return { vehicle_no: vehicleNo, count: enriched.length, locations: enriched };
 }
 
-export function getStoredPings(vehicleNoRaw, limit = 50) {
+export async function getStoredPings(vehicleNoRaw, limit = 50) {
   const vehicleNo = normalizeVehicleNo(vehicleNoRaw);
-  return db.prepare(
+  return await db.prepare(
     `SELECT * FROM fastag_pings WHERE vehicle_no = ? ORDER BY created_at DESC LIMIT ?`
   ).all(vehicleNo, limit);
 }

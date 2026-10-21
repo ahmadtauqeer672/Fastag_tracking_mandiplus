@@ -15,6 +15,8 @@ services:
         sync: false
       - key: TRACK_API_URL
         value: https://dashboard.traqo.in/api/v1/fastag/fetch_live_locations/
+      - key: DATABASE_URL
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: GEOCODE_CONTACT_EMAIL

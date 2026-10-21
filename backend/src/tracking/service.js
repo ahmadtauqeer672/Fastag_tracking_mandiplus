@@ -21,7 +21,7 @@ export async function searchVehicle(userId, vehicleNoRaw) {
   const vehicleNo = validateVehicleNo(vehicleNoRaw);
 
   // Check & deduct credits (ties into 4.0 Payment & Credit Management)
-  const credit = db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
+  const credit = await db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
   if (CREDITS_ENABLED && (!credit || credit.balance < CREDIT_COST_PER_SEARCH)) {
     throw new HttpError(402, `insufficient credits: need ${CREDIT_COST_PER_SEARCH}, have ${credit ? credit.balance : 0}`);
   }
@@ -31,17 +31,17 @@ export async function searchVehicle(userId, vehicleNoRaw) {
 
   // Deduct credits only on successful fetch
   if (CREDITS_ENABLED) {
-    db.prepare(`UPDATE credits SET balance = balance - ? WHERE user_id = ?`).run(CREDIT_COST_PER_SEARCH, userId);
+    await db.prepare(`UPDATE credits SET balance = balance - ? WHERE user_id = ?`).run(CREDIT_COST_PER_SEARCH, userId);
   }
 
   // Persist raw government_data
-  db.prepare(
+  await db.prepare(
     `INSERT INTO government_data (id, vehicle_no, source, payload) VALUES (?, ?, ?, ?)`
   ).run(crypto.randomUUID(), vehicleNo, 'VAHAN/ULIP/EWAYBILL', JSON.stringify(govData));
 
   // 2.3 Process & Format Data -> tracking_logs entry
   const trackingId = crypto.randomUUID();
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO tracking_logs
       (id, vehicle_no, latitude, longitude, location_name, status, eway_bill_no, eway_valid_till, toll_plaza, event_type)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -53,16 +53,16 @@ export async function searchVehicle(userId, vehicleNoRaw) {
   );
 
   // Record in search history (6.0)
-  db.prepare(
+  await db.prepare(
     `INSERT INTO search_history (id, user_id, query, query_type) VALUES (?, ?, ?, ?)`
   ).run(crypto.randomUUID(), userId, vehicleNo, 'vehicle_no');
 
-  auditLog(userId, 'vehicle_search', { vehicleNo });
+  await auditLog(userId, 'vehicle_search', { vehicleNo });
 
   // Fire an async notification (5.0), non-blocking-ish but awaited for demo simplicity
   await createNotificationForEvent(userId, vehicleNo, 'location_update', govData);
 
-  const remainingCredits = db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId).balance;
+  const remainingCredits = (await db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId)).balance;
 
   // 2.4 Display Tracking Details
   return {
@@ -79,16 +79,16 @@ export async function searchVehicle(userId, vehicleNoRaw) {
   };
 }
 
-export function getTrackingHistory(vehicleNo) {
+export async function getTrackingHistory(vehicleNo) {
   const vNo = validateVehicleNo(vehicleNo);
-  return db.prepare(
+  return await db.prepare(
     `SELECT * FROM tracking_logs WHERE vehicle_no = ? ORDER BY created_at DESC LIMIT 50`
   ).all(vNo);
 }
 
-export function getLatestTracking(vehicleNo) {
+export async function getLatestTracking(vehicleNo) {
   const vNo = validateVehicleNo(vehicleNo);
-  const row = db.prepare(
+  const row = await db.prepare(
     `SELECT * FROM tracking_logs WHERE vehicle_no = ? ORDER BY created_at DESC LIMIT 1`
   ).get(vNo);
   if (!row) throw new HttpError(404, 'no tracking data found for this vehicle; try searching it first');

@@ -20,7 +20,7 @@ export async function buyCredits(userId, { amount, method }) {
   const creditsToAdd = CREDIT_PACKAGES[amount];
 
   // 4.1 Create Payment Request
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO payments (id, user_id, amount, credits_purchased, method, status)
     VALUES (?, ?, ?, ?, ?, 'pending')
   `).run(paymentId, userId, amount, creditsToAdd, method);
@@ -29,21 +29,21 @@ export async function buyCredits(userId, { amount, method }) {
   const result = await processPayment({ amount, method });
 
   if (result.success) {
-    db.prepare(`UPDATE payments SET status = 'success' WHERE id = ?`).run(paymentId);
+    await db.prepare(`UPDATE payments SET status = 'success' WHERE id = ?`).run(paymentId);
     // 4.3 Update Credits
-    const existing = db.prepare(`SELECT user_id FROM credits WHERE user_id = ?`).get(userId);
+    const existing = await db.prepare(`SELECT user_id FROM credits WHERE user_id = ?`).get(userId);
     if (existing) {
-      db.prepare(`UPDATE credits SET balance = balance + ? WHERE user_id = ?`).run(creditsToAdd, userId);
+      await db.prepare(`UPDATE credits SET balance = balance + ? WHERE user_id = ?`).run(creditsToAdd, userId);
     } else {
-      db.prepare(`INSERT INTO credits (user_id, balance) VALUES (?, ?)`).run(userId, creditsToAdd);
+      await db.prepare(`INSERT INTO credits (user_id, balance) VALUES (?, ?)`).run(userId, creditsToAdd);
     }
   } else {
-    db.prepare(`UPDATE payments SET status = 'failed' WHERE id = ?`).run(paymentId);
+    await db.prepare(`UPDATE payments SET status = 'failed' WHERE id = ?`).run(paymentId);
   }
 
-  auditLog(userId, 'payment_attempt', { paymentId, amount, method, success: result.success });
+  await auditLog(userId, 'payment_attempt', { paymentId, amount, method, success: result.success });
 
-  const balance = db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
+  const balance = await db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
 
   // 4.4 Generate Transaction Record (returned to client / receipt)
   return {
@@ -56,11 +56,11 @@ export async function buyCredits(userId, { amount, method }) {
   };
 }
 
-export function getPaymentHistory(userId) {
-  return db.prepare(`SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`).all(userId);
+export async function getPaymentHistory(userId) {
+  return await db.prepare(`SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`).all(userId);
 }
 
-export function getCreditBalance(userId) {
-  const row = db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
+export async function getCreditBalance(userId) {
+  const row = await db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
   return row ? row.balance : 0;
 }

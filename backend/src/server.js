@@ -34,19 +34,19 @@ async function router(req, res) {
     // ---- Auth (1.0 User Management) ----
     if (pathname === '/api/auth/register' && method === 'POST') {
       const body = await readBody(req);
-      const result = registerUser(body);
+      const result = await registerUser(body);
       return sendJson(res, 201, result);
     }
 
     if (pathname === '/api/auth/login' && method === 'POST') {
       const body = await readBody(req);
-      const result = loginUser(body);
+      const result = await loginUser(body);
       return sendJson(res, 200, result);
     }
 
     if (pathname === '/api/auth/me' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, { user: publicUser(authUser.sub) });
+      return sendJson(res, 200, { user: await publicUser(authUser.sub) });
     }
 
     // ---- Tracking (2.0 Vehicle / E-Way Bill Search & Tracking) ----
@@ -60,14 +60,14 @@ async function router(req, res) {
     const trackMatch = pathname.match(/^\/api\/track\/([^/]+)$/);
     if (trackMatch && method === 'GET') {
       requireAuth(req);
-      const result = getLatestTracking(decodeURIComponent(trackMatch[1]));
+      const result = await getLatestTracking(decodeURIComponent(trackMatch[1]));
       return sendJson(res, 200, result);
     }
 
     const trackHistoryMatch = pathname.match(/^\/api\/track\/([^/]+)\/history$/);
     if (trackHistoryMatch && method === 'GET') {
       requireAuth(req);
-      const result = getTrackingHistory(decodeURIComponent(trackHistoryMatch[1]));
+      const result = await getTrackingHistory(decodeURIComponent(trackHistoryMatch[1]));
       return sendJson(res, 200, result);
     }
 
@@ -81,18 +81,18 @@ async function router(req, res) {
 
     if (pathname === '/api/payments/history' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, getPaymentHistory(authUser.sub));
+      return sendJson(res, 200, await getPaymentHistory(authUser.sub));
     }
 
     if (pathname === '/api/credits/balance' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, { balance: getCreditBalance(authUser.sub) });
+      return sendJson(res, 200, { balance: await getCreditBalance(authUser.sub) });
     }
 
     // ---- Notifications (5.0 Notification & Communication) ----
     if (pathname === '/api/notifications' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, getNotificationsForUser(authUser.sub));
+      return sendJson(res, 200, await getNotificationsForUser(authUser.sub));
     }
 
     if (pathname === '/api/notifications/send' && method === 'POST') {
@@ -106,39 +106,39 @@ async function router(req, res) {
     if (pathname === '/api/fleet/add' && method === 'POST') {
       const authUser = requireAuth(req);
       const body = await readBody(req);
-      const result = addVehicle(authUser.sub, body);
+      const result = await addVehicle(authUser.sub, body);
       return sendJson(res, 201, result);
     }
 
     if (pathname === '/api/fleet/list' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, listFleet(authUser.sub));
+      return sendJson(res, 200, await listFleet(authUser.sub));
     }
 
     const fleetStatusMatch = pathname.match(/^\/api\/fleet\/([^/]+)\/status$/);
     if (fleetStatusMatch && method === 'PUT') {
       const authUser = requireAuth(req);
       const body = await readBody(req);
-      const result = updateVehicleStatus(authUser.sub, fleetStatusMatch[1], body.status);
+      const result = await updateVehicleStatus(authUser.sub, fleetStatusMatch[1], body.status);
       return sendJson(res, 200, result);
     }
 
     const fleetDeleteMatch = pathname.match(/^\/api\/fleet\/([^/]+)$/);
     if (fleetDeleteMatch && method === 'DELETE') {
       const authUser = requireAuth(req);
-      const result = removeVehicle(authUser.sub, fleetDeleteMatch[1]);
+      const result = await removeVehicle(authUser.sub, fleetDeleteMatch[1]);
       return sendJson(res, 200, result);
     }
 
     // ---- History (6.0 History & Fleet Management) ----
     if (pathname === '/api/history/search' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, getSearchHistory(authUser.sub));
+      return sendJson(res, 200, await getSearchHistory(authUser.sub));
     }
 
     if (pathname === '/api/history/summary' && method === 'GET') {
       const authUser = requireAuth(req);
-      return sendJson(res, 200, getUserSummary(authUser.sub));
+      return sendJson(res, 200, await getUserSummary(authUser.sub));
     }
 
     // ---- FASTag live tracking (Traqo integration) ----
@@ -153,7 +153,7 @@ async function router(req, res) {
     if (fastagHistoryMatch && method === 'GET') {
       requireAuth(req);
       const limit = Number(url.searchParams.get('limit')) || 50;
-      const result = getStoredPings(decodeURIComponent(fastagHistoryMatch[1]), limit);
+      const result = await getStoredPings(decodeURIComponent(fastagHistoryMatch[1]), limit);
       return sendJson(res, 200, result);
     }
 
