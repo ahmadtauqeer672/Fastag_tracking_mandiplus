@@ -31,7 +31,7 @@ function MetaIcon({ name }) {
 }
 
 // Unique FASTag vehicle numbers from search history, most recent first.
-function recentVehicles(history, max = 8) {
+function recentVehicles(history, max = 4) {
   const seen = [];
   history.forEach((h) => {
     if (h.query_type === 'fastag' && !seen.includes(h.query)) seen.push(h.query);
