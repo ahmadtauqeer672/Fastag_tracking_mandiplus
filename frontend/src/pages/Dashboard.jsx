@@ -46,7 +46,6 @@ export default function Dashboard() {
           <h1>Welcome, {user.name.split(' ')[0]}</h1>
           <div className="sub">Here's what's happening with your fleet today</div>
         </div>
-        <div className="credit-pill">💳 {user.credits} credits</div>
       </div>
 
       <div className="card">
@@ -68,9 +67,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid-2 grid-even" style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 16 }}>
         <div className="stat-tile"><div className="stat-value">{summary.total_searches}</div><div className="stat-label">Vehicle searches</div></div>
-        <div className="stat-tile"><div className="stat-value">₹{summary.total_spent}</div><div className="stat-label">Total spent on credits</div></div>
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>

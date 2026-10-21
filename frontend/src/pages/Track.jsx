@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Api } from '../api/client.js';
 import { useAuth } from '../api/AuthContext.jsx';
 import { EmptyState, ErrorBanner, Spinner } from '../components/Common.jsx';
@@ -7,12 +6,10 @@ import VehicleResultCard from '../components/VehicleResultCard.jsx';
 import { timeAgo } from '../utils.js';
 
 export default function Track() {
-  const { user, updateCredits } = useAuth();
-  const navigate = useNavigate();
+  const { updateCredits } = useAuth();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [insufficientCredits, setInsufficientCredits] = useState(false);
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
 
@@ -20,7 +17,6 @@ export default function Track() {
     if (!query.trim()) return;
     setLoading(true);
     setError('');
-    setInsufficientCredits(false);
     setResult(null);
     try {
       const r = await Api.searchVehicle(query.trim());
@@ -30,7 +26,6 @@ export default function Track() {
       setHistory(h);
     } catch (err) {
       setError(err.message);
-      if (err.status === 402) setInsufficientCredits(true);
     }
     setLoading(false);
   }
@@ -42,7 +37,6 @@ export default function Track() {
           <h1>Track a vehicle</h1>
           <div className="sub">Live location, toll history and E-Way Bill status</div>
         </div>
-        <div className="credit-pill">💳 {user.credits} credits · 5 per search</div>
       </div>
 
       <div className="card">
@@ -63,11 +57,6 @@ export default function Track() {
       {error && (
         <div className="card" style={{ marginTop: 16 }}>
           <ErrorBanner message={error} />
-          {insufficientCredits && (
-            <button className="btn btn-secondary" onClick={() => navigate('/app/profile?tab=credits')}>
-              Buy credits
-            </button>
-          )}
         </div>
       )}
 

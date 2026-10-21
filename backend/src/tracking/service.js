@@ -5,6 +5,8 @@ import { HttpError } from '../auth/service.js';
 import { createNotificationForEvent } from '../notifications/service.js';
 
 const CREDIT_COST_PER_SEARCH = 5;
+// Credits are switched off for now; set to true to charge per search again.
+const CREDITS_ENABLED = false;
 
 // 2.1 Input Validation
 function validateVehicleNo(vehicleNo) {
@@ -20,7 +22,7 @@ export async function searchVehicle(userId, vehicleNoRaw) {
 
   // Check & deduct credits (ties into 4.0 Payment & Credit Management)
   const credit = db.prepare(`SELECT balance FROM credits WHERE user_id = ?`).get(userId);
-  if (!credit || credit.balance < CREDIT_COST_PER_SEARCH) {
+  if (CREDITS_ENABLED && (!credit || credit.balance < CREDIT_COST_PER_SEARCH)) {
     throw new HttpError(402, `insufficient credits: need ${CREDIT_COST_PER_SEARCH}, have ${credit ? credit.balance : 0}`);
   }
 
@@ -28,7 +30,9 @@ export async function searchVehicle(userId, vehicleNoRaw) {
   const govData = await fetchGovernmentVehicleData(vehicleNo);
 
   // Deduct credits only on successful fetch
-  db.prepare(`UPDATE credits SET balance = balance - ? WHERE user_id = ?`).run(CREDIT_COST_PER_SEARCH, userId);
+  if (CREDITS_ENABLED) {
+    db.prepare(`UPDATE credits SET balance = balance - ? WHERE user_id = ?`).run(CREDIT_COST_PER_SEARCH, userId);
+  }
 
   // Persist raw government_data
   db.prepare(

@@ -9,7 +9,7 @@ const QUERY_TYPE_LABELS = { fastag: 'FASTag', vehicle_no: 'Vehicle', eway_bill: 
 const TABS = [
   { key: 'searches', label: 'Searches' },
   { key: 'notifications', label: 'Notifications' },
-  { key: 'payments', label: 'Payments' },
+  // Payments tab hidden while credits are switched off.
 ];
 
 export default function History() {
@@ -28,7 +28,7 @@ export default function History() {
   return (
     <>
       <div className="page-header">
-        <div><h1>History</h1><div className="sub">Your past searches, alerts and payments</div></div>
+        <div><h1>History</h1><div className="sub">Your past searches and alerts</div></div>
       </div>
       <div className="tab-strip">
         {TABS.map((t) => (
