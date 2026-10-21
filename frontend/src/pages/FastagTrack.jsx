@@ -39,6 +39,13 @@ function recentVehicles(history, max = 8) {
   return seen.slice(0, max);
 }
 
+// Download size presets in steps of 5 below the total, e.g. 29 -> [5, 10, 15, 20, 25].
+function downloadCountOptions(total) {
+  const options = [];
+  for (let n = 5; n < total; n += 5) options.push(n);
+  return options;
+}
+
 function sortNewestFirst(locations) {
   return [...locations].sort((a, b) => {
     const ta = a.position_time ? new Date(a.position_time.replace(' ', 'T')).getTime() : 0;
@@ -53,6 +60,7 @@ export default function FastagTrack() {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadCount, setDownloadCount] = useState('all');
   const [recent, setRecent] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoSearched = useRef(false);
@@ -75,7 +83,9 @@ export default function FastagTrack() {
   async function doDownload() {
     setDownloading(true);
     try {
-      await downloadFastagReport(result);
+      // Locations are newest first, so the report keeps the latest N pings.
+      const locations = downloadCount === 'all' ? result.locations : result.locations.slice(0, Number(downloadCount));
+      await downloadFastagReport({ ...result, locations, count: locations.length });
     } catch (err) {
       setError(`Could not generate report: ${err.message}`);
     }
@@ -92,6 +102,7 @@ export default function FastagTrack() {
     try {
       const r = await Api.fastagLiveLocation(query);
       setResult({ ...r, locations: sortNewestFirst(r.locations) });
+      setDownloadCount('all');
     } catch (err) {
       setError(err.message);
     }
@@ -145,14 +156,31 @@ export default function FastagTrack() {
             <h1 style={{ fontSize: 16 }}>
               {result.vehicle_no} <span style={{ color: 'var(--ink-soft)', fontWeight: 500 }}>· {result.count} ping{result.count === 1 ? '' : 's'}</span>
             </h1>
-            <button
-              className="btn btn-secondary btn-sm"
-              type="button"
-              onClick={doDownload}
-              disabled={downloading || result.locations.length === 0}
-            >
-              {downloading ? <Spinner /> : 'Download'}
-            </button>
+            <div className="download-controls">
+              <label className="download-count">
+                <span>Latest</span>
+                <select
+                  value={downloadCount}
+                  onChange={(e) => setDownloadCount(e.target.value)}
+                  disabled={downloading || result.locations.length === 0}
+                  aria-label="Number of pings to download"
+                >
+                  {downloadCountOptions(result.locations.length).map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                  <option value="all">All ({result.locations.length})</option>
+                </select>
+                <span>pings</span>
+              </label>
+              <button
+                className="btn btn-secondary btn-sm"
+                type="button"
+                onClick={doDownload}
+                disabled={downloading || result.locations.length === 0}
+              >
+                {downloading ? <Spinner /> : 'Download'}
+              </button>
+            </div>
           </div>
           {result.locations.length === 0 ? (
             <EmptyState emoji="📡" title="No live pings found" desc="This vehicle has no recent FASTag toll crossings. Check the vehicle number or try again later." />

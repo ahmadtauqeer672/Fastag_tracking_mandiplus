@@ -1259,3 +1259,30 @@ table.data-table tr:last-child td { border-bottom: none; }
 }
 .recent-chip:hover:not(:disabled) { background: var(--sky-mid); border-color: var(--navy); }
 .recent-chip:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------- FASTag report download ---------- */
+.download-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.download-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.download-count select {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.download-count select:focus { outline: 2px solid var(--sky-mid); outline-offset: 1px; }
