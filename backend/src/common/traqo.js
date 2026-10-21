@@ -66,7 +66,10 @@ export async function fetchLiveLocations(vehicleNumber) {
   }
 
   if (!res.ok) {
-    const msg = (body && (body.message || body.error)) || `Traqo API returned ${res.status}`;
+    if (body && body.status === 'invalid_user') {
+      throw new TraqoApiError('Traqo rejected the API credentials (invalid_user). Check TRACK_API_USERNAME / TRACK_API_PASSWORD with Traqo.', 502);
+    }
+    const msg = (body && (body.message || body.error || body.status)) || `Traqo API returned ${res.status}`;
     throw new TraqoApiError(msg, res.status);
   }
 
