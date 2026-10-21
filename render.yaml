@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: fastag-tracking-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.13.0
+      - key: TRACK_API_USERNAME
+        sync: false
+      - key: TRACK_API_PASSWORD
+        sync: false
+      - key: TRACK_API_URL
+        value: https://dashboard.traqo.in/api/v1/fastag/fetch_live_locations/
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEOCODE_CONTACT_EMAIL
+        sync: false

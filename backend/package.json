@@ -5,5 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node --no-warnings --env-file-if-exists=.env src/server.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }
