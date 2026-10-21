@@ -484,11 +484,19 @@ a { color: inherit; }
   min-width: 0;
   padding-bottom: 20px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
-/* Plaza name + address on the left; time and date chips on one line at the right. */
-.fastag-ping-main { flex: 1; min-width: 0; }
+/* One line per ping: plaza name, address, then time and date chips at the right. */
+.fastag-ping-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fastag-ping-main .fastag-ping-header { flex: 0 1 auto; max-width: 55%; }
+.fastag-ping-main .fastag-ping-meta { flex: 1 1 0; margin-top: 0; }
 .fastag-ping-header {
   display: flex;
   align-items: center;
@@ -564,6 +572,9 @@ a { color: inherit; }
 .fastag-ping-latest .fastag-chip .fastag-meta-icon { color: #7fd3f5; }
 @media (max-width: 520px) {
   .fastag-ping-body { gap: 8px; }
+  .fastag-ping-main { gap: 6px; }
+  .fastag-ping-title { font-size: 13px; }
+  .fastag-ping-main .fastag-ping-meta { font-size: 11.5px; }
   .fastag-ping-chips { gap: 4px; }
   .fastag-chip { font-size: 11px; padding: 2px 7px 2px 6px; gap: 4px; }
   .fastag-chip .fastag-meta-icon { width: 11px; height: 11px; }
