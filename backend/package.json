@@ -1,0 +1,9 @@
+{
+  "name": "lorrycare-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --no-warnings --env-file-if-exists=.env src/server.js"
+  }
+}
