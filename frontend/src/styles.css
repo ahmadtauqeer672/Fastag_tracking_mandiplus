@@ -493,13 +493,18 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 .fastag-ping-title {
   font-size: 14px;
   font-weight: 700;
   color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+.fastag-latest-badge { flex-shrink: 0; }
 .fastag-ping-latest .fastag-ping-title { color: var(--navy); }
 .fastag-latest-badge {
   background: var(--navy);
@@ -515,17 +520,19 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  min-width: 0;
   margin-top: 3px;
   font-size: 12.5px;
   color: var(--ink-soft);
 }
 .fastag-ping-address {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
   color: var(--ink-soft);
 }
+.fastag-ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fastag-ping-address-missing { color: var(--amber); }
 .fastag-meta-icon { width: 14px; height: 14px; flex-shrink: 0; display: block; }
 .fastag-ping-chips {
@@ -555,6 +562,12 @@ a { color: inherit; }
   color: white;
 }
 .fastag-ping-latest .fastag-chip .fastag-meta-icon { color: #7fd3f5; }
+@media (max-width: 520px) {
+  .fastag-ping-body { gap: 8px; }
+  .fastag-ping-chips { gap: 4px; }
+  .fastag-chip { font-size: 11px; padding: 2px 7px 2px 6px; gap: 4px; }
+  .fastag-chip .fastag-meta-icon { width: 11px; height: 11px; }
+}
 table.data-table th {
   text-align: left;
   color: var(--ink-soft);

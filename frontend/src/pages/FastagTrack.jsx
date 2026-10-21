@@ -162,6 +162,7 @@ export default function FastagTrack() {
                 const isLatest = i === 0;
                 const hasAddress = loc.geocode_source !== 'error' && loc.city;
                 const pingTime = splitPingTime(loc.position_time);
+                const address = `${loc.city || ''}${loc.state ? `, ${loc.state}` : ''}${loc.pincode ? ` – ${loc.pincode}` : ''}`;
                 return (
                   <div className={`fastag-ping ${isLatest ? 'fastag-ping-latest' : ''}`} key={i}>
                     <div className="fastag-ping-rail">
@@ -171,14 +172,14 @@ export default function FastagTrack() {
                     <div className="fastag-ping-body">
                       <div className="fastag-ping-main">
                       <div className="fastag-ping-header">
-                        <span className="fastag-ping-title">{loc.toll_plaza || 'Unknown toll plaza'}</span>
+                        <span className="fastag-ping-title" title={loc.toll_plaza || ''}>{loc.toll_plaza || 'Unknown toll plaza'}</span>
                         {isLatest && <span className="fastag-latest-badge">Latest</span>}
                       </div>
                       <div className="fastag-ping-meta">
                         {hasAddress ? (
-                          <span className="fastag-ping-address">
+                          <span className="fastag-ping-address" title={address}>
                             <MetaIcon name="pin" />
-                            {loc.city}{loc.state ? `, ${loc.state}` : ''}{loc.pincode ? ` – ${loc.pincode}` : ''}
+                            <span className="fastag-ellipsis">{address}</span>
                           </span>
                         ) : (
                           <span className="fastag-ping-address fastag-ping-address-missing" title={loc.geocode_error || ''}>
