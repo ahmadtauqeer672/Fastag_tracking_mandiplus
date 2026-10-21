@@ -37,7 +37,7 @@ export default function Login() {
         <ErrorBanner message={error} />
         <form onSubmit={onSubmit}>
           <div className="field">
-            <label>Phone or Email</label>
+            <label>Mobile Number or User ID</label>
             <input
               type="text"
               placeholder="9876543210 or you@company.com"

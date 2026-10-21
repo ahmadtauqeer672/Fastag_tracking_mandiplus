@@ -134,7 +134,8 @@ function HomeNav() {
 function HeroLoginCard() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [mobile, setMobile] = useState('');
+  // Mobile number or user ID (email); the backend accepts either.
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
@@ -145,7 +146,7 @@ function HeroLoginCard() {
     setError('');
     setLoading(true);
     try {
-      await login(mobile, password);
+      await login(identifier.trim(), password);
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -160,12 +161,13 @@ function HeroLoginCard() {
       <ErrorBanner message={error} />
       <form onSubmit={onSubmit}>
         <div className="hero-input">
-          <span className="hero-input-icon">📞</span>
+          <span className="hero-input-icon">👤</span>
           <input
             type="text"
-            placeholder="Mobile Number"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
+            placeholder="Mobile Number or User ID"
+            autoComplete="username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
           />
         </div>
