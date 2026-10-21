@@ -11,9 +11,14 @@
 // Overridable via env var so this can point at a self-hosted Nominatim
 // instance (recommended if you have high query volume — see Nominatim's
 // usage policy) or a test double during development.
+import { db } from './db.js';
+
 const NOMINATIM_URL = process.env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org/reverse';
 const USER_AGENT = process.env.GEOCODE_USER_AGENT || 'LorryCare/1.0 (fleet-tracking-integration)';
 const CONTACT_EMAIL = process.env.GEOCODE_CONTACT_EMAIL || ''; // optional but recommended by Nominatim's policy
+// Fallback geocoder (also OSM-based, no key). Nominatim often blocks shared
+// cloud IPs such as Render's, so this keeps addresses working in production.
+const PHOTON_URL = process.env.PHOTON_URL || 'https://photon.komoot.io/reverse';
 
 const MIN_INTERVAL_MS = 1100; // stay just under 1 req/sec
 let lastRequestAt = 0;
@@ -60,10 +65,26 @@ export async function reverseGeocode(lat, lon) {
     return { ...cached, source: 'cache' };
   }
 
+  // Reuse an address already resolved for a ping at (almost) the same spot;
+  // toll plazas repeat a lot, and this survives server restarts.
+  const stored = await lookupStoredAddress(lat, lon);
+  if (stored) {
+    cache.set(key, { ...stored, cachedAt: Date.now() });
+    return { ...stored, source: 'cache' };
+  }
+
   try {
-    const result = await throttle(() => fetchNominatim(lat, lon));
+    let result;
+    let source = 'nominatim';
+    try {
+      result = await throttle(() => fetchNominatim(lat, lon));
+    } catch (nominatimErr) {
+      console.warn(`[geocode] Nominatim failed for (${lat}, ${lon}), trying Photon:`, nominatimErr.message);
+      result = await throttle(() => fetchPhoton(lat, lon));
+      source = 'photon';
+    }
     cache.set(key, { ...result, cachedAt: Date.now() });
-    return { ...result, source: 'nominatim' };
+    return { ...result, source };
   } catch (err) {
     // Logged here (not just returned) so the real failure reason shows up in
     // the backend terminal — without this, every failure just looks like a
@@ -113,4 +134,37 @@ async function fetchNominatim(lat, lon) {
     pincode: addr.postcode || null,
     display_name: data.display_name || null,
   };
+}
+
+async function lookupStoredAddress(lat, lon) {
+  const d = 0.0005; // ~50m
+  try {
+    const row = await db.prepare(`
+      SELECT city, state, pincode, geocode_display_name AS display_name FROM fastag_pings
+      WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ? AND city IS NOT NULL
+      LIMIT 1
+    `).get(lat - d, lat + d, lon - d, lon + d);
+    return row || null;
+  } catch (err) {
+    console.warn('[geocode] stored address lookup failed:', err.message);
+    return null;
+  }
+}
+
+async function fetchPhoton(lat, lon) {
+  const params = new URLSearchParams({ lat: String(lat), lon: String(lon), lang: 'en' });
+  const res = await fetch(`${PHOTON_URL}?${params.toString()}`, {
+    headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Photon request failed: ${res.status} ${res.statusText}`);
+
+  const data = await res.json();
+  const p = data.features?.[0]?.properties;
+  if (!p) throw new Error('Photon returned no result');
+
+  const city = p.city || p.town || p.village || p.locality || p.district || p.county || null;
+  const display_name = [p.name, p.street, p.district, city, p.state, p.postcode, p.country]
+    .filter((v, i, arr) => v && arr.indexOf(v) === i)
+    .join(', ');
+  return { city, state: p.state || null, pincode: p.postcode || null, display_name: display_name || null };
 }
