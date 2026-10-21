@@ -487,7 +487,7 @@ a { color: inherit; }
   align-items: flex-start;
   gap: 12px;
 }
-/* Plaza name + address on the left; date/time chips stacked on the right. */
+/* Plaza name + address on the left; time and date chips on one line at the right. */
 .fastag-ping-main { flex: 1; min-width: 0; }
 .fastag-ping-header {
   display: flex;
@@ -530,8 +530,7 @@ a { color: inherit; }
 .fastag-meta-icon { width: 14px; height: 14px; flex-shrink: 0; display: block; }
 .fastag-ping-chips {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 5px;
   flex-shrink: 0;
 }

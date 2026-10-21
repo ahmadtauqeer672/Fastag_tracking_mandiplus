@@ -190,8 +190,8 @@ export default function FastagTrack() {
                       </div>
                       {pingTime && (
                         <div className="fastag-ping-chips">
-                          <span className="fastag-chip"><MetaIcon name="calendar" />{pingTime.date}</span>
                           {pingTime.time && <span className="fastag-chip"><MetaIcon name="clock" />{pingTime.time}</span>}
+                          <span className="fastag-chip"><MetaIcon name="calendar" />{pingTime.date}</span>
                         </div>
                       )}
                     </div>
