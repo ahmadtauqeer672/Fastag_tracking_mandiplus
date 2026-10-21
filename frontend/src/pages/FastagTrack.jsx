@@ -170,10 +170,15 @@ export default function FastagTrack() {
                       {i !== result.locations.length - 1 && <div className="fastag-ping-line" />}
                     </div>
                     <div className="fastag-ping-body">
-                      <div className="fastag-ping-main">
                       <div className="fastag-ping-header">
                         <span className="fastag-ping-title" title={loc.toll_plaza || ''}>{loc.toll_plaza || 'Unknown toll plaza'}</span>
                         {isLatest && <span className="fastag-latest-badge">Latest</span>}
+                        {pingTime && (
+                          <div className="fastag-ping-chips">
+                            {pingTime.time && <span className="fastag-chip"><MetaIcon name="clock" />{pingTime.time}</span>}
+                            <span className="fastag-chip"><MetaIcon name="calendar" />{pingTime.date}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="fastag-ping-meta">
                         {hasAddress ? (
@@ -188,13 +193,6 @@ export default function FastagTrack() {
                           </span>
                         )}
                       </div>
-                      </div>
-                      {pingTime && (
-                        <div className="fastag-ping-chips">
-                          {pingTime.time && <span className="fastag-chip"><MetaIcon name="clock" />{pingTime.time}</span>}
-                          <span className="fastag-chip"><MetaIcon name="calendar" />{pingTime.date}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
