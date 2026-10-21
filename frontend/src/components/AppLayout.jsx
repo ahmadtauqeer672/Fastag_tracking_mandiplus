@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../api/AuthContext.jsx';
 import logo from '../assets/logo.jpg';
+import { roleLabel } from '../utils.js';
 
 // Stroke icons (24x24, Lucide-style) so every nav item shares one visual weight.
 const ICON_PATHS = {
@@ -68,7 +69,7 @@ export default function AppLayout() {
             <div className="avatar">{(user?.name || 'U')[0].toUpperCase()}</div>
             <div className="meta">
               <div className="name">{user?.name}</div>
-              <div className="role">{user?.role}</div>
+              <div className="role">{roleLabel(user?.role)}</div>
             </div>
           </div>
           <button type="button" className="nav-item nav-logout" onClick={onLogout}>

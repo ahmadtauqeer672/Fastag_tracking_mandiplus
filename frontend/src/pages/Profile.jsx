@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../api/AuthContext.jsx';
+import { roleLabel } from '../utils.js';
 
 // Credits and the "Buy credits" tab are hidden for now.
 export default function Profile() {
@@ -14,7 +15,7 @@ export default function Profile() {
         <table className="data-table">
           <tbody>
             <tr><th>Name</th><td>{user.name}</td></tr>
-            <tr><th>Role</th><td style={{ textTransform: 'capitalize' }}>{user.role}</td></tr>
+            <tr><th>Role</th><td>{roleLabel(user.role)}</td></tr>
             <tr><th>Phone</th><td>{user.phone || '—'}</td></tr>
             <tr><th>Email</th><td>{user.email || '—'}</td></tr>
             <tr><th>Member since</th><td>{user.created_at}</td></tr>

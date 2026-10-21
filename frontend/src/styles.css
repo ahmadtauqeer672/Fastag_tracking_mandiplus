@@ -301,7 +301,7 @@ a { color: inherit; }
 }
 .sidebar-user .meta { flex: 1; min-width: 0; }
 .sidebar-user .meta .name { font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sidebar-user .meta .role { color: rgba(255,255,255,0.6); font-size: 11.5px; text-transform: capitalize; }
+.sidebar-user .meta .role { color: rgba(255,255,255,0.6); font-size: 11.5px; }
 .nav-logout:hover { background: rgba(255, 99, 99, 0.14); color: #ffd6d6; }
 
 .main {

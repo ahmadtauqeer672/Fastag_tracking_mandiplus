@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT UNIQUE,
   phone TEXT UNIQUE,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('transporter','driver','business','customer')),
+  role TEXT NOT NULL CHECK(role IN ('transporter','driver','business','customer','ceo')),
   created_at TEXT DEFAULT __NOW__
 );
 

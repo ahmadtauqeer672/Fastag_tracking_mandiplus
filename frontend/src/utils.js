@@ -19,3 +19,10 @@ export function statusClass(status) {
   if (s.includes('fail')) return 'failed';
   return 'idle';
 }
+
+// Display label for a user role, e.g. "transporter" -> "Transporter", "ceo" -> "CEO".
+export function roleLabel(role) {
+  if (!role) return '';
+  if (role === 'ceo') return 'CEO';
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
