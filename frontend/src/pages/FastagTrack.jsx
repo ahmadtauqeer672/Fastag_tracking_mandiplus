@@ -169,6 +169,7 @@ export default function FastagTrack() {
                       {i !== result.locations.length - 1 && <div className="fastag-ping-line" />}
                     </div>
                     <div className="fastag-ping-body">
+                      <div className="fastag-ping-main">
                       <div className="fastag-ping-header">
                         <span className="fastag-ping-title">{loc.toll_plaza || 'Unknown toll plaza'}</span>
                         {isLatest && <span className="fastag-latest-badge">Latest</span>}
@@ -185,6 +186,7 @@ export default function FastagTrack() {
                             Address unavailable
                           </span>
                         )}
+                      </div>
                       </div>
                       {pingTime && (
                         <div className="fastag-ping-chips">
