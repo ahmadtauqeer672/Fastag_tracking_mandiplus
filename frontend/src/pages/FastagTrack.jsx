@@ -60,7 +60,7 @@ export default function FastagTrack() {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [downloading, setDownloading] = useState(false);
-  const [downloadCount, setDownloadCount] = useState('all');
+  const [downloadCount, setDownloadCount] = useState('10');
   const [recent, setRecent] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const autoSearched = useRef(false);
@@ -102,7 +102,8 @@ export default function FastagTrack() {
     try {
       const r = await Api.fastagLiveLocation(query);
       setResult({ ...r, locations: sortNewestFirst(r.locations) });
-      setDownloadCount('all');
+      // Default to the latest 10 pings; 10 isn't an option when there are 10 or fewer.
+      setDownloadCount(r.locations.length > 10 ? '10' : 'all');
     } catch (err) {
       setError(err.message);
     }
