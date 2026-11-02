@@ -24,5 +24,6 @@ export function statusClass(status) {
 export function roleLabel(role) {
   if (!role) return '';
   if (role === 'ceo') return 'CEO';
+  if (role === 'tech_ops_head') return 'Technical and Operation Head';
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
